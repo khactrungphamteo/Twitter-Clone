@@ -3,9 +3,12 @@ package com.codepath.apps.restclienttemplate
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.codepath.apps.restclienttemplate.models.Tweet
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
@@ -14,6 +17,7 @@ import okhttp3.Headers
 class ComposeActivity : AppCompatActivity() {
     lateinit var etCompose: EditText
     lateinit var btnTweet: Button
+    lateinit var etVal: TextView
     lateinit var client: TwitterClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,8 +25,29 @@ class ComposeActivity : AppCompatActivity() {
 
         etCompose = findViewById(R.id.etTweetCompose)
         btnTweet = findViewById(R.id.btnTweet)
-
+        etVal = findViewById(R.id.tvCharCount)
         client = TwitterApplication.getRestClient(this)
+
+        etCompose.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                val remainingChar = 280 - count
+                etVal.text = "$remainingChar characters remaining"
+                if (remainingChar <= 0) {
+                    etVal.text = "0 characters remaining"
+
+                    btnTweet.isClickable = false
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                btnTweet.isClickable = true
+
+            }
+        })
 
         // Handling the user's click on the tweet button
         btnTweet.setOnClickListener {
@@ -36,7 +61,7 @@ class ComposeActivity : AppCompatActivity() {
             }
 
             // make sure the tweet is under character count
-            if (tweetContent.length > 148) {
+            if (tweetContent.length > 280) {
                 Toast.makeText(this, "Tweet is too long! limit is 148 characters", Toast.LENGTH_SHORT).show()
             } else {
                 // Make an api call to Twitter to publish tweet
