@@ -21,8 +21,6 @@ class TweetAdapter(private val tweets: ArrayList<Tweet>) : RecyclerView.Adapter<
 
     }
 
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context = parent.context
         val inflater = LayoutInflater.from(context)
@@ -42,8 +40,6 @@ class TweetAdapter(private val tweets: ArrayList<Tweet>) : RecyclerView.Adapter<
         holder.tvTimeStamp.text = tweet.createAt
         // using Glide lirbary to pass images onto
         Glide.with(holder.itemView).load(tweet.user?.publicImageUrl).into(holder.ivProfileImage)
-
-
     }
 
     override fun getItemCount(): Int {

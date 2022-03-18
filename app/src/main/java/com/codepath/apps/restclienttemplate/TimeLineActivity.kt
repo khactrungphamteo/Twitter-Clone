@@ -1,12 +1,20 @@
 package com.codepath.apps.restclienttemplate
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.telephony.TelephonyCallback
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.codepath.apps.restclienttemplate.ComposeActivity.Companion.REQUEST_CODE
 import com.codepath.apps.restclienttemplate.models.Tweet
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import okhttp3.Headers
@@ -60,6 +68,59 @@ class TimeLineActivity : AppCompatActivity() {
 
         populateHomeTimeLine()
 
+    }
+
+    // TODO
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    // Handles click on menu item
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.compose) {
+            // whenever the user shows the icon, the message "Ready to compose tweet!" show up
+            Toast.makeText(this, "Ready to compose tweet!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ComposeActivity::class.java)
+            composeActivityResultLauncher.launch(intent)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    // this method is called after we come back from the ComposeActivity
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        if(resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+//
+//            // get the data from our intent
+//            val tweet = data?.getParcelableExtra<Tweet>("tweet") as Tweet
+//
+//            // update timeline by adding add our new tweet to the existing Arraylist of tweet
+//            tweets.add(0, tweet)
+//
+//            // update adapter
+//            tweetAdapter.notifyItemInserted(0)
+//        }
+//        super.onActivityResult(requestCode, resultCode, data)
+//    }
+
+    private var composeActivityResultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // If the user comes back to this activity from EditActivity
+        // with no error or cancellation
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+
+            // get the data from our intent
+            val tweet = data?.getParcelableExtra<Tweet>("tweet") as Tweet
+
+            // update timeline by adding our new tweet
+            tweets.add(0, tweet)
+
+            // update adapter
+            tweetAdapter.notifyItemInserted(0)
+            rvTweets.smoothScrollToPosition(0)
+        }
     }
 
     fun populateHomeTimeLine() {
